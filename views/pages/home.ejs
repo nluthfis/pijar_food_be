@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+  *{
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .up {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 100px;
+  }
+ 
+  h1 {
+    margin: 0;
+    font-size: 72px;
+    font-weight: bold;
+    color: #2E266F;
+  }
+  
+  .image-image {
+    width: 550px;
+    height: 550px;
+    border-radius: 10px;
+  }
+ 
+  .content-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 1272px;
+    padding: 100px;
+  }
+  
+  .item-image {
+    width: 600px;
+    height: 500px;
+    margin-right: 50px;
+    margin-bottom: 50px;
+  }
+  
+  .item-text {
+    flex: 1;
+  }
+  
+  .item-title {
+    font-weight: 500;
+    font-size: 56px;
+    margin-left: 100px;
+  }
+  
+  .item-description {
+    font-size: 16px;
+    margin-left: 100px;
+    background-color: orange;
+    padding: 15px;
+    padding-left: 30px;
+    padding-right: 30px;
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+  }
+  .newRecipe{
+    margin-left: 10%;
+    font-size: 32px;
+  }
+
+  
+</style>
+<body>
+    <header>
+        <%- include('../partials/header') %>
+    </header>
+    <div class="up">
+      <h1>Discover Recipe <br> & Delivery Food</h1>
+      <img src="1.jpg" class="image-image">
+    </div>
+    
+    <div class="content">
+      <div>
+        <p class="newRecipe"> New Recipe</p>
+      </div>
+      <div class="content-item">
+        <% for(var i = 0; i < recipes.length; i++) { %>
+        <img src="/<%= recipes[i].imgPath %>" class="item-image" >
+        <div class="item-text">
+        <p class="item-title"><%= recipes[i].tittle %></p>
+        <div class="learnMore">
+          <a href="/views/recipes/<%= recipes[i].id %>" class="item-description">Learn More</a>
+        </div>
+        </div>
+        <% } %>
+      </div>
+    </div>
+    
+      
+    
+    <footer>
+      <%- include('../partials/footer') %>
+    </footer>
+
+    
+</body>
+</html>

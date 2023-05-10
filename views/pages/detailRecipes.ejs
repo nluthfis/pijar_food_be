@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+  *{
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .item-tittle{
+    display: flex;
+    font-size: 56px;
+    justify-content: center;
+  }
+  .item-image{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 700px;
+    height: 500px;
+  }
+  .item-ingredients{
+    margin-left: 200px;
+    font-size: 28px;
+  }
+  .item-ing{
+    margin-left: 200px;
+    font-size: 42px;
+  }
+  .videoLink{
+    font-size: 16px;
+    margin-left: 200px;
+    background-color: orange;
+    padding: 15px;
+    padding-left: 30px;
+    padding-right: 30px;
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+  }
+  .comment {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    border-style: none;
+    border-radius: 10px;
+    margin-top: 50px;
+    width: 60%;
+    height: 100px;
+    padding: 10px;
+    background-color: #E5E4E2;
+  }
+</style>
+<body>
+    <header>
+        <%- include('../partials/header') %>
+    </header>
+    
+    <div class="content">
+      <% for(var i = 0; i < recipes.length; i++) { %>
+        <div>
+          <p class="item-tittle"><%= recipes[i].tittle %></p>
+        </div>
+        <div>
+          <img class="item-image" src="/<%= recipes[i].imgPath %>" >
+        </div>
+        <div>
+          <p class="item-ing"> Ingredients </p>
+          <% item = recipes[i].ingredients.split(", ") %>
+          <% for(var j = 0; j < item.length; j++) { %>
+            <p class="item-ingredients">-  <%= item[j] %> </p>
+          <% } %>
+        </div>
+        <div class="learnMore">
+          <a href="<%= recipes[i].videoLink %>" class="videoLink">Video Link</a>
+        </div>
+        <div>
+          <textarea class="comment">Comment : </textarea>
+        </div>
+      <% } %>
+    </div>
+      
+    <footer>
+      <%- include('../partials/footer') %>
+    </footer>
+
+    
+</body>
+</html>
