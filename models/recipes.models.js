@@ -73,17 +73,6 @@ const deleteRecipes = async (id) => {
   }
 };
 
-const addUserId = async (payload, id) => {
-  try {
-    const query = await db`UPDATE recipes set ${db(
-      payload,
-      "user_id"
-    )} WHERE id = ${id} returning *`;
-    return query;
-  } catch (error) {
-    return error;
-  }
-};
 
 const editPhotoRecipes = async (payload, id) => {
   try {
@@ -91,16 +80,13 @@ const editPhotoRecipes = async (payload, id) => {
       payload,
       "photo"
     )} WHERE id = ${id} returning *`;
-      console.log(query)
     return query;
   } catch (error) {
-    console.log(error)
     return error;
   }
 };
 
 module.exports = {
-  addUserId,
   getAllRecipe,
   getAllRecipesByKeyword,
   getAllRecipedBySort,

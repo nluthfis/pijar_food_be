@@ -131,14 +131,12 @@ async function insertRecipeData(req, res) {
       data: query,
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       status: false,
       message: "Server error",
     });
   }
 }
-
 async function editRecipesData(req, res) {
   try {
     const user_id = req.user.id;
@@ -157,7 +155,7 @@ async function editRecipesData(req, res) {
     }
 
     const checkData = await model.getRecipesById(id);
-  
+
     if (!checkData.length) {
       res.status(404).json({
         status: false,
@@ -204,8 +202,6 @@ async function deleteRecipesData(req, res) {
       params: { id },
     } = req;
 
-    console.log(req);
-
     if (isNaN(id)) {
       res.status(400).json({
         status: false,
@@ -214,9 +210,7 @@ async function deleteRecipesData(req, res) {
       return;
     }
 
-    
     const checkData = await model.getRecipesById(id);
-
 
     // validasi jika id yang kita mau edit tidak ada di database
     if (!checkData.length) {
@@ -250,10 +244,23 @@ async function deleteRecipesData(req, res) {
     });
   }
 }
-
 async function editPhoto(req, res) {
   try {
     const { id } = req.params;
+    console.log(id);
+    const user_id = req.user.id;
+    console.log(user_id);
+
+    const checkData = await model.getRecipesById(id);
+    console.log(checkData);
+    if (checkData[0].user_id != user_id) {
+      res.status(400).json({
+        status: false,
+        message: "ID berbeda",
+      });
+
+      return;
+    }
 
     const { photo } = req?.files ?? {};
 
@@ -295,7 +302,6 @@ async function editPhoto(req, res) {
 
     upload
       .then(async (data) => {
-        console.log(data);
         const payload = {
           photo: data?.secure_url,
         };
@@ -315,7 +321,6 @@ async function editPhoto(req, res) {
         });
       });
   } catch (error) {
-    console.log(error);
     res.status(500).send({
       status: false,
       message: "Error on server",

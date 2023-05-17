@@ -3,7 +3,7 @@ const profileController = require('../controller/profile.controller')
 const middleware = require('../middleware/jwt.middleware')
 
 
-router.get('/profile', middleware ,profileController.getProfile)
+router.get('/profile', middleware , profileController.getProfile)
 
 router.get('/profile', middleware , profileController.getProfileById)
 
