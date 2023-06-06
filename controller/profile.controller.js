@@ -123,6 +123,15 @@ async function insertUsers(req, res) {
       return;
     }
     // check if email already exists in the database
+    const emailExists = await model.getProfileByEmail(email);
+    console.log(emailExists);
+    if (emailExists.length > 0) {
+      res.status(400).json({
+        status: false,
+        message: "Email already exists",
+      });
+      return;
+    }
 
     const payload = {
       email,
