@@ -123,15 +123,6 @@ async function insertUsers(req, res) {
       return;
     }
     // check if email already exists in the database
-    const emailExists = await model.getProfileByEmail(email);
-    console.log(emailExists);
-    if (emailExists.length > 0) {
-      res.status(400).json({
-        status: false,
-        message: "Email already exists",
-      });
-      return;
-    }
 
     const payload = {
       email,
@@ -275,11 +266,11 @@ async function deleteUsers(req, res) {
   }
 }
 
-async function editPhoto (req, res) {
+async function editPhoto(req, res) {
   try {
     jwt.verify(getToken(req), process.env.PRIVATE_KEY, async (err, { id }) => {
       const { photo } = req?.files ?? {};
-      console.log(photo)
+      console.log(photo);
       if (!photo) {
         res.status(400).send({
           status: false,
@@ -307,7 +298,7 @@ async function editPhoto (req, res) {
       }
 
       cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_NAME ,
+        cloud_name: process.env.CLOUDINARY_NAME,
         api_key: process.env.CLODUNARY_KEY,
         api_secret: process.env.CLOUDINARY_SECRET,
       });
@@ -344,8 +335,7 @@ async function editPhoto (req, res) {
       message: "Error on server",
     });
   }
-};
-
+}
 
 module.exports = {
   getProfile,
