@@ -28,30 +28,27 @@ async function loginUser(req, res) {
     }
 
     // Load hash from your password DB.
-    bcrypt.compare(
-      password,
-      checkEmail[0]?.password,
-      function (err, result) {
-        if (result) {
-          const token = jwt.sign(
-            { ...checkEmail[0], password: null },
-            process.env.PRIVATE_KEY
-          );
+    bcrypt.compare(password, checkEmail[0]?.password, function (err, result) {
+      if (result) {
+        const token = jwt.sign(
+          { ...checkEmail[0], password: null },
+          process.env.PRIVATE_KEY
+        );
 
-          res.json({
-            status: true,
-            message: "Get data success",
-            data: checkEmail,
-            token,
-          });
-        } else {
-          res.status(400).json({
-            status: false,
-            message: "Wrong password",
-          });
-          return;
-        }
-      });
+        res.json({
+          status: true,
+          message: "Get data success",
+          data: checkEmail,
+          token,
+        });
+      } else {
+        res.status(400).json({
+          status: false,
+          message: "Wrong password",
+        });
+        return;
+      }
+    });
   } catch (error) {
     console.log(error);
     res.status(400).json({

@@ -8,6 +8,7 @@ function getToken(req) {
     7,
     req?.headers?.authorization?.length
   );
+  console.log(token);
   return token;
 }
 
@@ -63,7 +64,6 @@ async function getRecipes(req, res) {
     });
   }
 }
-
 async function getRecipesById(req, res) {
   try {
     const {
@@ -97,6 +97,63 @@ async function getRecipesById(req, res) {
     res.status(400).json({
       status: false,
       message: "Error not found",
+    });
+  }
+}
+
+async function getRecipesByUserId(req, res) {
+  try {
+    jwt.verify(getToken(req), process.env.PRIVATE_KEY, async (err, { id }) => {
+      let query;
+      let keyword = `%${req?.query?.keyword}%`;
+      let sort = db`DESC`;
+      let isPaginate =
+        req?.query?.page &&
+        !isNaN(req?.query?.page) &&
+        parseInt(req?.query?.page) >= 1;
+
+      if (req?.query?.sortType?.toLowerCase() === "asc") {
+        if (isPaginate) {
+          sort = db`ASC LIMIT 3 OFFSET ${3 * (parseInt(req?.query?.page) - 1)}`;
+        } else {
+          sort = db`ASC`;
+        }
+      }
+
+      if (isPaginate && !req?.query?.sortType) {
+        sort = db`DESC LIMIT 3 OFFSET ${3 * (parseInt(req?.query?.page) - 1)}`;
+      }
+
+      if (req?.query?.keyword) {
+        query =
+          await db`SELECT *, count(*) OVER() AS full_count FROM recipes WHERE LOWER(recipes.tittle) LIKE LOWER(${keyword}) AND user_id = ${id} ORDER BY id ${sort}`;
+      } else {
+        query =
+          await db`SELECT *, count(*) OVER() AS full_count FROM recipes WHERE user_id = ${id} ORDER BY id ${sort}`;
+      }
+
+      res.json({
+        status: query?.length ? true : false,
+        message: query?.length ? "Get data success" : "Data not found",
+        total: query?.length ?? 0,
+        pages: isPaginate
+          ? {
+              current: parseInt(req?.query?.page),
+              total: query?.[0]?.full_count
+                ? Math.ceil(parseInt(query?.[0]?.full_count) / 3)
+                : 0,
+            }
+          : null,
+        data: query?.map((item) => {
+          delete item.full_count;
+          return item;
+        }),
+      });
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: "Server error",
     });
   }
 }
@@ -248,6 +305,7 @@ async function editPhoto(req, res) {
   try {
     const { id } = req.params;
     console.log(id);
+
     const user_id = req.user.id;
     console.log(user_id);
 
@@ -256,7 +314,7 @@ async function editPhoto(req, res) {
     if (checkData[0].user_id != user_id) {
       res.status(400).json({
         status: false,
-        message: "ID berbeda",
+        message: "ID berbedaaaa",
       });
 
       return;
@@ -274,7 +332,6 @@ async function editPhoto(req, res) {
     let mimeType = photo.mimetype.split("/")[1];
     let allowFile = ["jpeg", "jpg", "png", "webp"];
 
-    // cari apakah tipe data yang di upload terdapat salah satu dari list yang ada diatas
     if (!allowFile?.find((item) => item === mimeType)) {
       res.status(400).send({
         status: false,
@@ -300,26 +357,19 @@ async function editPhoto(req, res) {
       public_id: new Date().toISOString(),
     });
 
-    upload
-      .then(async (data) => {
-        const payload = {
-          photo: data?.secure_url,
-        };
+    upload.then(async (data) => {
+      const payload = {
+        photo: data?.secure_url,
+      };
 
-        model.editPhotoRecipes(payload, id);
+      model.editPhotoRecipes(payload, id);
 
-        res.status(200).send({
-          status: false,
-          message: "Success upload",
-          data: payload,
-        });
-      })
-      .catch((err) => {
-        res.status(400).send({
-          status: false,
-          message: err,
-        });
+      res.status(500).send({
+        status: true,
+        message: "Success upload",
+        data: payload,
       });
+    });
   } catch (error) {
     res.status(500).send({
       status: false,
@@ -331,6 +381,7 @@ async function editPhoto(req, res) {
 module.exports = {
   getRecipes,
   getRecipesById,
+  getRecipesByUserId,
   insertRecipeData,
   editRecipesData,
   deleteRecipesData,

@@ -26,6 +26,27 @@ const getAllRecipedBySort = async (sort) => {
   }
 };
 
+const getAllRecipesByIdUserKeyword = async (keyword, sort, id) => {
+  try {
+    const query =
+      await db`SELECT *, count(*) OVER() as full_count FROM recipes WHERE LOWER(recipes.tittle) ILIKE LOWER(${keyword}) AND user_id = ${id} ORDER BY recipes.id ${sort}`;
+    return query;
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
+const getAllRecipedByidUserSort = async (sort, id) => {
+  try {
+    const query =
+      await db`SELECT *, count(*) OVER() as full_count FROM recipes WHERE user_id = ${id} ORDER BY recipes.id ${sort}`;
+    return query;
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
 const getRecipesById = async (id) => {
   try {
     const query = await db`SELECT * FROM recipes WHERE id = ${id}`;
@@ -73,7 +94,6 @@ const deleteRecipes = async (id) => {
   }
 };
 
-
 const editPhotoRecipes = async (payload, id) => {
   try {
     const query = await db`UPDATE recipes set ${db(
@@ -90,6 +110,8 @@ module.exports = {
   getAllRecipe,
   getAllRecipesByKeyword,
   getAllRecipedBySort,
+  getAllRecipesByIdUserKeyword,
+  getAllRecipedByidUserSort,
   getRecipesById,
   insertRecipesData,
   editRecipesData,
