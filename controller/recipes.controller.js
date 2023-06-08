@@ -100,7 +100,6 @@ async function getRecipesById(req, res) {
     });
   }
 }
-
 async function getRecipesByUserId(req, res) {
   try {
     jwt.verify(getToken(req), process.env.PRIVATE_KEY, async (err, { id }) => {
@@ -157,15 +156,16 @@ async function getRecipesByUserId(req, res) {
     });
   }
 }
-
 async function insertRecipeData(req, res) {
   try {
     const { id } = req.user;
 
     const { tittle, ingredients, videoLink } = req.body;
 
+    const { photo } = req.files;
+
     // validasi input
-    if (!(tittle && ingredients && videoLink)) {
+    if (!(tittle && ingredients && videoLink && photo)) {
       res.status(400).json({
         status: false,
         message: "Bad input, please complete all of fields",
@@ -173,19 +173,49 @@ async function insertRecipeData(req, res) {
       return;
     }
 
-    const payload = {
-      tittle,
-      ingredients,
-      videoLink,
-      user_id: id,
-    };
+    if (photo.size > 2000000) {
+      res.status(400).send({
+        status: false,
+        message: "File to big, max size 2MB",
+      });
+    }
 
-    const query = await model.insertRecipesData(payload);
+    let mimeType = photo.mimetype.split("/")[1];
+    let allowFile = ["jpeg", "jpg", "png", "webp"];
 
-    res.json({
-      status: true,
-      message: "Success insert data",
-      data: query,
+    if (!allowFile?.find((item) => item === mimeType)) {
+      res.status(400).send({
+        status: false,
+        message: "Only accept jpeg, jpg, png, webp",
+      });
+    }
+
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_NAME,
+      api_key: process.env.CLODUNARY_KEY,
+      api_secret: process.env.CLOUDINARY_SECRET,
+    });
+
+    const upload = cloudinary.uploader.upload(photo.tempFilePath, {
+      folder: "img/recipes",
+      public_id: new Date().toISOString(),
+    });
+
+    upload.then(async (data) => {
+      const payload = {
+        tittle,
+        ingredients,
+        videoLink,
+        user_id: id,
+        photo: data?.secure_url,
+      };
+      const query = await model.insertRecipesData(payload);
+      console.log(query);
+      res.json({
+        status: true,
+        message: "Success insert data",
+        data: query,
+      });
     });
   } catch (error) {
     res.status(500).json({

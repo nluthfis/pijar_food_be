@@ -63,7 +63,8 @@ const insertRecipesData = async (payload) => {
       "tittle",
       "ingredients",
       "videoLink",
-      "user_id"
+      "user_id",
+      "photo"
     )} returning *`;
     return query;
   } catch (error) {
