@@ -124,7 +124,6 @@ async function insertUsers(req, res) {
     }
     // check if email already exists in the database
     const emailExists = await model.getProfileByEmail(email);
-    console.log(emailExists);
     if (emailExists.length > 0) {
       res.status(400).json({
         status: false,
@@ -140,16 +139,9 @@ async function insertUsers(req, res) {
       phoneNumber,
     };
 
-    let query;
-    bcrypt.genSalt(
-      saltRounds,
-      await function (err, salt) {
-        bcrypt.hash(password, salt, function (err, hash) {
-          // Store hash in your password DB.
-          query = model.insertProfile({ ...payload, password: hash });
-        });
-      }
-    );
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hash = await bcrypt.hash(password, salt);
+    const query = await model.insertProfile({ ...payload, password: hash });
     res.json({
       status: true,
       message: "Success insert data",
@@ -279,7 +271,6 @@ async function editPhoto(req, res) {
   try {
     jwt.verify(getToken(req), process.env.PRIVATE_KEY, async (err, { id }) => {
       const { photo } = req?.files ?? {};
-      console.log(photo);
       if (!photo) {
         res.status(400).send({
           status: false,

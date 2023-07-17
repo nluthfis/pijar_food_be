@@ -1,6 +1,8 @@
 const model = require("../models/recipes.models");
+const modelProfile = require("../models/profile.models");
 const db = require("../connection");
 const jwt = require("jsonwebtoken");
+const { c } = require("tar");
 const cloudinary = require("cloudinary").v2;
 
 function getToken(req) {
@@ -8,7 +10,6 @@ function getToken(req) {
     7,
     req?.headers?.authorization?.length
   );
-  console.log(token);
   return token;
 }
 
@@ -16,6 +17,8 @@ async function getRecipes(req, res) {
   try {
     let query;
     let keyword = `%${req?.query?.keyword}%`;
+    let category = `%${req?.query?.category}%`;
+    let popular = req?.query?.popular;
     let sort = db`DESC`;
     let isPaginate =
       req?.query?.page &&
@@ -24,18 +27,22 @@ async function getRecipes(req, res) {
 
     if (req?.query?.sortType?.toLowerCase() === "asc") {
       if (isPaginate) {
-        sort = db`ASC LIMIT 3 OFFSET ${3 * (parseInt(req?.query?.page) - 1)}`;
+        sort = db`ASC LIMIT 5 OFFSET ${5 * (parseInt(req?.query?.page) - 1)}`;
       } else {
         sort = db`ASC`;
       }
     }
 
     if (isPaginate && !req?.query?.sortType) {
-      sort = db`DESC LIMIT 3 OFFSET ${3 * (parseInt(req?.query?.page) - 1)}`;
+      sort = db`DESC LIMIT 5 OFFSET ${5 * (parseInt(req?.query?.page) - 1)}`;
     }
 
     if (req?.query?.keyword) {
       query = await model.getAllRecipesByKeyword(keyword, sort);
+    } else if (req?.query?.popular === "popular") {
+      query = await model.getAllRecipedByRating();
+    } else if (req?.query?.category) {
+      query = await model.getAllRecipesByCategory(category, sort);
     } else {
       query = await model.getAllRecipedBySort(sort);
     }
@@ -48,7 +55,7 @@ async function getRecipes(req, res) {
         ? {
             current: parseInt(req?.query?.page),
             total: query?.[0]?.full_count
-              ? Math.ceil(parseInt(query?.[0]?.full_count) / 3)
+              ? Math.ceil(parseInt(query?.[0]?.full_count) / 5)
               : 0,
           }
         : null,
@@ -58,6 +65,7 @@ async function getRecipes(req, res) {
       }),
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       status: false,
       message: "Server error",
@@ -160,12 +168,12 @@ async function insertRecipeData(req, res) {
   try {
     const { id } = req.user;
 
-    const { tittle, ingredients, videoLink } = req.body;
+    const { tittle, ingredients, videoLink, category } = req.body;
 
     const { photo } = req.files;
 
     // validasi input
-    if (!(tittle && ingredients && videoLink && photo)) {
+    if (!(tittle && ingredients && videoLink && photo && category)) {
       res.status(400).json({
         status: false,
         message: "Bad input, please complete all of fields",
@@ -206,11 +214,11 @@ async function insertRecipeData(req, res) {
         tittle,
         ingredients,
         videoLink,
+        category,
         user_id: id,
         photo: data?.secure_url,
       };
       const query = await model.insertRecipesData(payload);
-      console.log(query);
       res.json({
         status: true,
         message: "Success insert data",
@@ -334,13 +342,11 @@ async function deleteRecipesData(req, res) {
 async function editPhoto(req, res) {
   try {
     const { id } = req.params;
-    console.log(id);
 
     const user_id = req.user.id;
-    console.log(user_id);
 
     const checkData = await model.getRecipesById(id);
-    console.log(checkData);
+
     if (checkData[0].user_id != user_id) {
       res.status(400).json({
         status: false,
@@ -407,6 +413,215 @@ async function editPhoto(req, res) {
     });
   }
 }
+async function getLiked(req, res) {
+  try {
+    let recipe_id = `${req?.query?.recipe_id}`; // query params
+    const getLike = await model.getLiked(recipe_id);
+    if (getLike.length === 0) {
+      res.status(400).json({
+        status: false,
+        message: "Recipe not found",
+      });
+      return;
+    }
+
+    let likedBy = getLike[0].liked_by;
+
+    res.json({
+      message: "Suceess get liked",
+      data: getLike,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: "Server error",
+    });
+  }
+}
+async function addLiked(req, res) {
+  try {
+    jwt.verify(getToken(req), process.env.PRIVATE_KEY, async (err, { id }) => {
+      let recipe_id = `${req?.query?.recipe_id}`;
+      const query = await model.getRecipesByRecipeId(recipe_id);
+
+      if (query.length === 0) {
+        res.status(400).json({
+          status: false,
+          message: "Recipe not found",
+        });
+        return;
+      }
+
+      const getLike = await model.getLiked(recipe_id);
+
+      let likedBy = getLike[0].liked_by;
+
+      if (likedBy.includes(id)) {
+        res.status(400).json({
+          status: false,
+          message: "User already liked",
+        });
+        return;
+      }
+
+      likedBy = [...likedBy, id];
+
+      const payload = {
+        liked_by: likedBy,
+      };
+
+      await db`UPDATE recipes set ${db(
+        payload
+      )} WHERE recipes.id = ${recipe_id} returning *`;
+
+      res.json({
+        message: "Suceess liked",
+      });
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: "Server error",
+    });
+  }
+}
+async function removeLiked(req, res) {
+  try {
+    jwt.verify(getToken(req), process.env.PRIVATE_KEY, async (err, { id }) => {
+      const id_user = req.user.id.toString();
+      let recipe_id = `${req?.query?.recipe_id}`;
+      const query = await db`SELECT * FROM recipes WHERE id = ${recipe_id}`;
+
+      if (query.length === 0) {
+        res.status(400).json({
+          status: false,
+          message: "Recipe not found",
+        });
+        return;
+      }
+
+      const getLike =
+        await db`SELECT liked_by FROM recipes WHERE recipes.id = ${recipe_id}`;
+
+      let likedBy = getLike[0].liked_by;
+
+      if (!likedBy.includes(id)) {
+        res.status(400).json({
+          status: false,
+          message: "User has not liked this recipe yet",
+        });
+        return;
+      }
+
+      likedBy = likedBy.split(",");
+      likedBy = likedBy.filter((userId) => userId !== id_user);
+      likedBy = likedBy.join(",");
+
+      const payload = {
+        liked_by: likedBy,
+      };
+
+      await db`UPDATE recipes set ${db(
+        payload
+      )} WHERE recipes.id = ${recipe_id} returning *`;
+
+      res.json({
+        message: "Successfully unliked",
+      });
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: "Server error",
+    });
+  }
+}
+async function addComment(req, res) {
+  try {
+    jwt.verify(getToken(req), process.env.PRIVATE_KEY, async (err, { id }) => {
+      let recipe_id = req?.body?.recipe_id;
+      let score = req?.body?.score;
+      let comment = req?.body?.comment;
+
+      const query = await model.getRecipesById(recipe_id);
+
+      if (query.length === 0) {
+        res.status(400).json({
+          status: false,
+          message: "Recipe not found",
+        });
+        return;
+      }
+
+      if (!(recipe_id && score && comment)) {
+        res.status(400).json({
+          status: false,
+          message: "Bad input, please complete all of fields",
+        });
+        return;
+      }
+
+      if (score < 1 || score > 5) {
+        res.status(400).json({
+          status: false,
+          message: "Score must be between 1 and 5",
+        });
+        return;
+      }
+
+      getUser = await modelProfile.getProfileById(id);
+
+      checkComment = await model.checkComment(id, recipe_id);
+
+      if (checkComment.length > 0) {
+        res.status(400).json({
+          status: false,
+          message: "User already commented",
+        });
+        return;
+      }
+
+      const payload = {
+        score,
+        comment,
+        comment_by: id,
+        name_user: getUser[0].fullName,
+        photo_user: getUser[0].photo,
+        recipe_id: recipe_id,
+      };
+
+      const addComment = await model.insertComment(payload);
+
+      res.json({
+        message: "Successfully add comment",
+        data: addComment,
+      });
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: "Server error",
+    });
+  }
+}
+async function getComment(req, res) {
+  try {
+    let recipe_id = `${req?.query?.recipe_id}`;
+    const query = await model.getAllComment(recipe_id);
+
+    res.json({
+      status: query?.length ? true : false,
+      message: query?.length ? "Get data success" : "Data not found",
+      data: query,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: false,
+      message: "Server error",
+    });
+  }
+}
 
 module.exports = {
   getRecipes,
@@ -416,4 +631,9 @@ module.exports = {
   editRecipesData,
   deleteRecipesData,
   editPhoto,
+  addLiked,
+  getComment,
+  removeLiked,
+  addComment,
+  getLiked,
 };

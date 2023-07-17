@@ -20,8 +20,8 @@ const getProfileById = async (id) => {
 
 const getProfileByEmail = async (email) => {
   try {
-    const query = await db`SELECT * FROM users WHERE LOWER(email) = LOWER(${email})`;
-    console.log(query)
+    const query =
+      await db`SELECT * FROM users WHERE LOWER(email) = LOWER(${email})`;
     return query;
   } catch (error) {
     return error;
@@ -73,14 +73,11 @@ const editPhotoUser = async (payload, id) => {
       payload,
       "photo"
     )} WHERE id = ${id} returning *`;
-    console.log(query)
     return query;
-    
   } catch (error) {
     return error;
   }
 };
-
 
 module.exports = {
   getAllUser,

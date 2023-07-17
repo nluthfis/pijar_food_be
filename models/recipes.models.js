@@ -3,7 +3,6 @@ const db = require("../connection");
 
 const getAllRecipe = async () => {
   query = db`SELECT * FROM recipes`;
-  console.log(query);
 };
 
 const getAllRecipesByKeyword = async (keyword, sort) => {
@@ -16,10 +15,36 @@ const getAllRecipesByKeyword = async (keyword, sort) => {
   }
 };
 
+const getAllRecipesByCategory = async (category, sort) => {
+  try {
+    const query =
+      await db`SELECT *, count(*) OVER() as full_count FROM recipes WHERE LOWER(recipes.category) ILIKE LOWER(${category}) ORDER BY recipes.id ${sort}`;
+    return query;
+  } catch (error) {
+    return error;
+  }
+};
+
 const getAllRecipedBySort = async (sort) => {
   try {
     const query =
-      await db`SELECT *, count(*) OVER() as full_count FROM recipes ORDER BY recipes.id ${sort}`;
+      await db`SELECT *, count(*) OVER() as full_count FROM recipes ORDER BY recipes.created_at ${sort}`;
+    return query;
+  } catch (error) {
+    return error;
+  }
+};
+
+const getAllRecipedByRating = async () => {
+  try {
+    const query = await db`SELECT *
+    FROM recipes
+    LEFT JOIN (
+      SELECT recipe_id, AVG(score) AS average_score
+      FROM recipes_info
+      GROUP BY recipe_id
+    ) AS avg_score ON recipes.id = avg_score.recipe_id
+    ORDER BY avg_score.average_score DESC NULLS LAST`;
     return query;
   } catch (error) {
     return error;
@@ -64,7 +89,8 @@ const insertRecipesData = async (payload) => {
       "ingredients",
       "videoLink",
       "user_id",
-      "photo"
+      "photo",
+      "category"
     )} returning *`;
     return query;
   } catch (error) {
@@ -107,15 +133,82 @@ const editPhotoRecipes = async (payload, id) => {
   }
 };
 
+const getRecipesByRecipeId = async (recipe_id) => {
+  try {
+    const query = await db`SELECT * FROM recipes WHERE id = ${recipe_id}`;
+    return query;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+const getLiked = async (recipe_id) => {
+  try {
+    const query =
+      await db`SELECT liked_by FROM recipes WHERE recipes.id = ${recipe_id}`;
+    return query;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+const getAllComment = async (recipe_id) => {
+  try {
+    const query =
+      await db`SELECT * FROM recipes_info WHERE recipe_id = ${recipe_id}`;
+    return query;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+const checkComment = async (id, recipe_id) => {
+  try {
+    const query =
+      await db`SELECT comment_by FROM recipes_info WHERE comment_by = ${id} AND recipe_id = ${recipe_id}`;
+    return query;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+const insertComment = async (payload) => {
+  try {
+    const query = await db`INSERT INTO recipes_info ${db(
+      payload,
+      "score",
+      "comment",
+      "comment_by",
+      "recipe_id",
+      "name_user",
+      "photo_user"
+    )} returning *`;
+    return query;
+  } catch (error) {
+    return error;
+  }
+};
+
 module.exports = {
   getAllRecipe,
   getAllRecipesByKeyword,
   getAllRecipedBySort,
+  getAllRecipesByCategory,
   getAllRecipesByIdUserKeyword,
   getAllRecipedByidUserSort,
+  getAllRecipedByRating,
   getRecipesById,
   insertRecipesData,
   editRecipesData,
   deleteRecipes,
   editPhotoRecipes,
+  getLiked,
+  getAllComment,
+  checkComment,
+  insertComment,
+  getRecipesByRecipeId,
 };
