@@ -34,6 +34,7 @@ app.use(profileRoutes);
 app.use(recipesRoutes);
 app.use(authUser);
 
-app.listen(8000, () => {
-  console.log("App running in port 8000");
+const port = process.env.PORT || 8000;
+app.listen(port, "0.0.0.0", function () {
+  console.log("Listening on Port " + port);
 });
