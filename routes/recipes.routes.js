@@ -23,11 +23,11 @@ router.delete("/recipes/:id", middleware, recipesController.deleteRecipesData);
 // edit photo
 router.patch("/recipes/photo/:id", middleware, recipesController.editPhoto);
 
-router.get("/likes", recipesController.getLiked);
+router.get("/getlikes", recipesController.getLiked);
 
-router.patch("/likes", middleware, recipesController.addLiked);
+router.post("/likes", middleware, recipesController.addLiked);
 
-router.patch("/unlikes", middleware, recipesController.removeLiked);
+router.delete("/unlikes", middleware, recipesController.removeLiked);
 
 router.post(
   "/post_comment",
@@ -36,7 +36,8 @@ router.post(
   profileController.getProfileById
 );
 
-// get all recipes comment
 router.get("/comment", recipesController.getComment);
+
+router.get("/liked/recipes", middleware, recipesController.getRecipeLikedById);
 
 module.exports = router;

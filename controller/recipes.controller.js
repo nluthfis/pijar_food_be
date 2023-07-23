@@ -418,116 +418,16 @@ async function getLiked(req, res) {
     let recipe_id = `${req?.query?.recipe_id}`; // query params
     const getLike = await model.getLiked(recipe_id);
     if (getLike.length === 0) {
-      res.status(400).json({
+      res.status(200).json({
         status: false,
-        message: "Recipe not found",
+        message: "No likes for this recipe",
       });
       return;
     }
 
-    let likedBy = getLike[0].liked_by;
-
     res.json({
       message: "Suceess get liked",
       data: getLike,
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: false,
-      message: "Server error",
-    });
-  }
-}
-async function addLiked(req, res) {
-  try {
-    jwt.verify(getToken(req), process.env.PRIVATE_KEY, async (err, { id }) => {
-      let recipe_id = `${req?.query?.recipe_id}`;
-      const query = await model.getRecipesByRecipeId(recipe_id);
-
-      if (query.length === 0) {
-        res.status(400).json({
-          status: false,
-          message: "Recipe not found",
-        });
-        return;
-      }
-
-      const getLike = await model.getLiked(recipe_id);
-
-      let likedBy = getLike[0].liked_by;
-
-      if (likedBy.includes(id)) {
-        res.status(400).json({
-          status: false,
-          message: "User already liked",
-        });
-        return;
-      }
-
-      likedBy = [...likedBy, id];
-
-      const payload = {
-        liked_by: likedBy,
-      };
-
-      await db`UPDATE recipes set ${db(
-        payload
-      )} WHERE recipes.id = ${recipe_id} returning *`;
-
-      res.json({
-        message: "Suceess liked",
-      });
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: false,
-      message: "Server error",
-    });
-  }
-}
-async function removeLiked(req, res) {
-  try {
-    jwt.verify(getToken(req), process.env.PRIVATE_KEY, async (err, { id }) => {
-      const id_user = req.user.id.toString();
-      let recipe_id = `${req?.query?.recipe_id}`;
-      const query = await db`SELECT * FROM recipes WHERE id = ${recipe_id}`;
-
-      if (query.length === 0) {
-        res.status(400).json({
-          status: false,
-          message: "Recipe not found",
-        });
-        return;
-      }
-
-      const getLike =
-        await db`SELECT liked_by FROM recipes WHERE recipes.id = ${recipe_id}`;
-
-      let likedBy = getLike[0].liked_by;
-
-      if (!likedBy.includes(id)) {
-        res.status(400).json({
-          status: false,
-          message: "User has not liked this recipe yet",
-        });
-        return;
-      }
-
-      likedBy = likedBy.split(",");
-      likedBy = likedBy.filter((userId) => userId !== id_user);
-      likedBy = likedBy.join(",");
-
-      const payload = {
-        liked_by: likedBy,
-      };
-
-      await db`UPDATE recipes set ${db(
-        payload
-      )} WHERE recipes.id = ${recipe_id} returning *`;
-
-      res.json({
-        message: "Successfully unliked",
-      });
     });
   } catch (err) {
     res.status(500).json({
@@ -622,6 +522,121 @@ async function getComment(req, res) {
     });
   }
 }
+async function addLiked(req, res) {
+  try {
+    jwt.verify(getToken(req), process.env.PRIVATE_KEY, async (err, { id }) => {
+      let recipe_id = `${req?.query?.recipe_id}`;
+      const query = await model.getRecipesByRecipeId(recipe_id);
+      console.log(id);
+      if (query.length === 0) {
+        res.status(400).json({
+          status: false,
+          message: "Recipe not found",
+        });
+        return;
+      }
+
+      const getLike = await model.checkLiked(id);
+
+      let isLiked = false;
+
+      for (let i = 0; i < getLike.length; i++) {
+        if (getLike[i].recipe_id == recipe_id) {
+          isLiked = true;
+          break;
+        }
+      }
+
+      if (isLiked) {
+        res.status(400).json({
+          status: false,
+          message: "User already liked",
+        });
+        return;
+      }
+
+      const payload = {
+        user_id: id,
+        recipe_id: recipe_id,
+      };
+
+      await model.addLiked(payload);
+
+      res.json({
+        message: "Suceess liked",
+        data: query,
+      });
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: "Server error",
+    });
+  }
+}
+async function removeLiked(req, res) {
+  try {
+    jwt.verify(getToken(req), process.env.PRIVATE_KEY, async (err, { id }) => {
+      let recipe_id = `${req?.query?.recipe_id}`;
+      const query = await model.getRecipesByRecipeId(recipe_id);
+      console.log(id);
+      if (query.length === 0) {
+        res.status(400).json({
+          status: false,
+          message: "Recipe not found",
+        });
+        return;
+      }
+
+      const getLike = await model.checkLiked(id);
+      console.log(getLike);
+
+      let isLiked = false;
+
+      for (let i = 0; i < getLike.length; i++) {
+        if (getLike[i].recipe_id == recipe_id) {
+          isLiked = true;
+          break;
+        }
+      }
+
+      if (!isLiked) {
+        res.status(400).json({
+          status: false,
+          message: "User have't liked yet",
+        });
+        return;
+      }
+      await model.deleteLiked(id, recipe_id);
+
+      res.json({
+        message: "Suceess unliked",
+        data: query,
+      });
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: "Server error",
+    });
+  }
+}
+async function getRecipeLikedById(req, res) {
+  try {
+    jwt.verify(getToken(req), process.env.PRIVATE_KEY, async (err, { id }) => {
+      const getLike = await model.getRecipeLikedById(id);
+      res.json({
+        message: "Suceess get data",
+        data: getLike,
+      });
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: "Server error",
+    });
+  }
+}
 
 module.exports = {
   getRecipes,
@@ -636,4 +651,5 @@ module.exports = {
   removeLiked,
   addComment,
   getLiked,
+  getRecipeLikedById,
 };

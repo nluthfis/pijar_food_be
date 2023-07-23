@@ -146,7 +146,7 @@ const getRecipesByRecipeId = async (recipe_id) => {
 const getLiked = async (recipe_id) => {
   try {
     const query =
-      await db`SELECT liked_by FROM recipes WHERE recipes.id = ${recipe_id}`;
+      await db`SELECT user_id FROM like_by WHERE recipe_id = ${recipe_id}`;
     return query;
   } catch (error) {
     console.log(error);
@@ -192,6 +192,49 @@ const insertComment = async (payload) => {
     return error;
   }
 };
+const checkLiked = async (id) => {
+  try {
+    const query = await db`SELECT recipe_id FROM like_by WHERE user_id = ${id}`;
+    return query;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+const addLiked = async (payload) => {
+  try {
+    const query = await db`INSERT INTO like_by ${db(
+      payload,
+      "user_id",
+      "recipe_id"
+    )} returning *`;
+    return query;
+  } catch (error) {
+    return error;
+  }
+};
+const deleteLiked = async (id, recipe_id) => {
+  try {
+    const query =
+      await db`DELETE FROM like_by WHERE user_id = ${id} AND recipe_id = ${recipe_id} returning *`;
+    return query;
+  } catch (error) {
+    return error;
+  }
+};
+const getRecipeLikedById = async (id) => {
+  try {
+    const query = await db`SELECT like_by.user_id, recipes.*
+      FROM like_by
+      JOIN recipes ON like_by.recipe_id = recipes.id
+      JOIN users ON like_by.user_id = users.id
+      WHERE users.id = ${id} `;
+    return query;
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
 
 module.exports = {
   getAllRecipe,
@@ -211,4 +254,8 @@ module.exports = {
   checkComment,
   insertComment,
   getRecipesByRecipeId,
+  checkLiked,
+  addLiked,
+  deleteLiked,
+  getRecipeLikedById,
 };
