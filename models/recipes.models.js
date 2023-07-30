@@ -90,7 +90,8 @@ const insertRecipesData = async (payload) => {
       "videoLink",
       "user_id",
       "photo",
-      "category"
+      "category",
+      "description"
     )} returning *`;
     return query;
   } catch (error) {
@@ -104,7 +105,9 @@ const editRecipesData = async (payload, id) => {
       payload,
       "tittle",
       "ingredients",
-      "videoLink"
+      "videoLink",
+      "category",
+      "description"
     )} WHERE id = ${id} returning *`;
     return query;
   } catch (error) {

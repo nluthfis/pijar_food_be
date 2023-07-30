@@ -168,12 +168,14 @@ async function insertRecipeData(req, res) {
   try {
     const { id } = req.user;
 
-    const { tittle, ingredients, videoLink, category } = req.body;
+    const { tittle, ingredients, videoLink, category, description } = req.body;
 
     const { photo } = req.files;
 
     // validasi input
-    if (!(tittle && ingredients && videoLink && photo && category)) {
+    if (
+      !(tittle && ingredients && videoLink && photo && category && description)
+    ) {
       res.status(400).json({
         status: false,
         message: "Bad input, please complete all of fields",
@@ -215,6 +217,7 @@ async function insertRecipeData(req, res) {
         ingredients,
         videoLink,
         category,
+        description,
         user_id: id,
         photo: data?.secure_url,
       };
@@ -237,7 +240,7 @@ async function editRecipesData(req, res) {
     const user_id = req.user.id;
     const {
       params: { id },
-      body: { tittle, ingredients, videoLink },
+      body: { tittle, ingredients, videoLink, category, description },
     } = req;
 
     if (isNaN(id)) {
@@ -273,6 +276,8 @@ async function editRecipesData(req, res) {
       tittle: tittle ?? checkData[0].tittle,
       ingredients: ingredients ?? checkData[0].ingredients,
       videoLink: videoLink ?? checkData[0].videoLink,
+      category: category ?? checkData[0].category,
+      description: description ?? checkData[0].description,
     };
 
     const query = await model.editRecipesData(payload, id);
