@@ -84,7 +84,7 @@ CLOUDINARY_SECRET=
 Link Api :
 https://odd-plum-cougar-cuff.cyclic.app
 
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://www.postman.com/galactic-moon-858796/workspace/public/collection/26602283-237ddb2d-dece-47b6-94ed-41fb97f58037?action=share&creator=26602283)
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://elements.getpostman.com/redirect?entityId=26602283-237ddb2d-dece-47b6-94ed-41fb97f58037&entityType=collection)
 
 ## Related Project
 
