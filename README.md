@@ -13,6 +13,15 @@ API endpoints for:
 - Authentication using JWT
 - Database using Postgresql
 
+## The PijarFood Backend is built using the following technologies:
+
+- [Express](https://expressjs.com/)
+- [Node.js](https://nodejs.org/en)
+- [PostgreSQL](https://www.postgresql.org/)
+- [JWT](https://jwt.io/)
+- [Bcrypt](https://www.npmjs.com/package/bcrypt)
+- [Cloudinary](https://cloudinary.com)
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
@@ -72,13 +81,16 @@ CLOUDINARY_SECRET=
 
 ## Postman Documentation
 
+Link Api :
+https://odd-plum-cougar-cuff.cyclic.app
+
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://www.postman.com/galactic-moon-858796/workspace/public/collection/26602283-237ddb2d-dece-47b6-94ed-41fb97f58037?action=share&creator=26602283)
 
 ## Related Project
 
 - [Food Recipe Website](https://github.com/nluthfis/fe-react_pijarfood)
 - [Food Recipe Mobile](https://github.com/nluthfis/mb_pijar_food)
-- [Food Recipe Webiste Demo](https://fe-react-pijarfood.vercel.app)
+- [Food Recipe Webiste Demo](fe-react-pijarfood-c2qoebphn-nluthfis.vercel.app)
 
 ## Authors
 
