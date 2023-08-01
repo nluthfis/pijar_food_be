@@ -89,8 +89,8 @@ https://odd-plum-cougar-cuff.cyclic.app
 ## Related Project
 
 - [Food Recipe Website](https://github.com/nluthfis/fe-react_pijarfood)
-- [Food Recipe Mobile](https://github.com/nluthfis/mb_pijar_food)
-- [Food Recipe Webiste Demo](fe-react-pijarfood-c2qoebphn-nluthfis.vercel.app)
+- [Food Recipe Mobile](https://github.com/nluthfis/pijar_food_mobile)
+- [Food Recipe Webiste Demo](https://fe-react-pijarfood.vercel.app)
 
 ## Authors
 
