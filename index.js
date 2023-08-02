@@ -35,6 +35,9 @@ app.use(recipesRoutes);
 app.use(authUser);
 
 const port = process.env.PORT || 8000;
+app.get("/", function (req, res) {
+  res.send("Api is running Well!");
+});
 app.listen(port, "0.0.0.0", function () {
   console.log("Listening on Port " + port);
 });
