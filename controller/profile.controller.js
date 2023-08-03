@@ -168,7 +168,7 @@ async function editUsers(req, res) {
         if (isNaN(id)) {
           res.status(400).json({
             status: false,
-            message: "ID must be integer",
+            message: "ID must be an integer",
           });
 
           return;
@@ -194,26 +194,33 @@ async function editUsers(req, res) {
 
         let query;
         if (password) {
-          bcrypt.genSalt(
-            saltRounds,
-            await function (err, salt) {
-              bcrypt.hash(password, salt, async function (err, hash) {
-                // Store hash in your password DB.
-                query = await model.editProfile(
-                  { ...payload, password: hash },
-                  id
-                );
+          bcrypt.genSalt(saltRounds, async function (err, salt) {
+            try {
+              const hash = await bcrypt.hash(password, salt);
+              query = await model.editProfile(
+                { ...payload, password: hash },
+                id
+              );
+              res.send({
+                status: true,
+                message: "Success edit data",
+                data: query,
+              });
+            } catch (error) {
+              res.status(500).json({
+                status: false,
+                message: "Internal Server Error",
               });
             }
-          );
+          });
         } else {
           query = await model.editProfile(payload, id);
+          res.send({
+            status: true,
+            message: "Success edit data",
+            data: query,
+          });
         }
-        res.send({
-          status: true,
-          message: "Success edit data",
-          data: query,
-        });
       }
     );
   } catch (error) {
