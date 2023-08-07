@@ -2,18 +2,36 @@
 
 ## Backend API for the PijarFood recipe website built with Express.js.
 
-This repository contains the backend API for the PijarFood recipe website. It is built with Express.js and provides RESTful API endpoints.
+This repository contains the backend API for the PijarFood recipe website and app.
+Pijar food is a platform to view food recipes that provides users with a wide range of recipes for various dishes and cuisines.
+It is built with Express.js and provides RESTful API endpoints.
 
-## Features :
+## Table of Contents
 
-API endpoints for:
+- [Features](#features)
+- [Technologies Used](#technologies-used)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [API Endpoints](#api-endpoints)
+- [Postman Documentation](#postman-documentation)
+- [Related Projects](#related-projects)
+- [Authors](#authors)
 
-- Recipes
-- Users
-- Authentication using JWT
-- Database using Postgresql
+## Features:
 
-## The PijarFood Backend is built using the following technologies:
+- Login/Register: Users can create accounts or log in to existing accounts.
+- View Recipes: Users can browse and view various food recipes.
+- View Recipes by Category: Recipes can be filtered by categories for easier navigation.
+- Add Recipes: Registered users can add new recipes to the app.
+- Like Recipes: Users can like their favorite recipes.
+- Review Recipes: Users can rate and comment on recipes.
+- Message between Users: Users can send messages to each other.
+- View My Created Recipes: Registered users can see the recipes they have added.
+- View My Liked Recipes: Users can see the recipes they have liked.
+- Edit User's Photo and Info: Users can update their profile photo and information.
+
+## Technologies Used:
 
 - [Express](https://expressjs.com/)
 - [Node.js](https://nodejs.org/en)
@@ -22,34 +40,40 @@ API endpoints for:
 - [Bcrypt](https://www.npmjs.com/package/bcrypt)
 - [Cloudinary](https://cloudinary.com)
 
-## Getting Started
+## Getting Started:
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-Prerequisites
+
+### Prerequisites:
 
 - Node.js
 - Postgresql
 
-## Installing:
+### Installation:
 
-- Clone the repository
-- git clone https://github.com/nluthfis/PijarFood.git
-- add .env
+1. Clone the repository:
 
-```bash
-*PostgreSQL database
-DB_HOST=
-DB_PORT=
-DB_DATABASE=
-DB_USERNAME=
-DB_PASSWORD=
-*JWT
-PRIVATE_KEY=
-*CLOUDINARY
-CLOUDINARY_NAME=
-CLODUNARY_KEY=
-CLOUDINARY_SECRET=
-```
+   ```bash
+   git clone https://github.com/nluthfis/pijar_food_be.git
+
+   ```
+
+2. Add the following environment variables to your .env file:
+
+   ```bash
+   *PostgreSQL database
+   DB_HOST=
+   DB_PORT=
+   DB_DATABASE=
+   DB_USERNAME=
+   DB_PASSWORD=
+   *JWT
+   PRIVATE_KEY=
+   *CLOUDINARY
+   CLOUDINARY_NAME=
+   CLODUNARY_KEY=
+   CLOUDINARY_SECRET=
+   ```
 
 ## Install dependencies:
 
@@ -84,13 +108,13 @@ CLOUDINARY_SECRET=
 Link Api :
 https://odd-plum-cougar-cuff.cyclic.app
 
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://elements.getpostman.com/redirect?entityId=26602283-237ddb2d-dece-47b6-94ed-41fb97f58037&entityType=collection)
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://documenter.getpostman.com/view/26602283/2s9XxzuD5B)
 
 ## Related Project
 
-- [Food Recipe Website](https://github.com/nluthfis/fe-react_pijarfood)
+- [Food Recipe Website](https://github.com/nluthfis/pijar_food_web)
 - [Food Recipe Mobile](https://github.com/nluthfis/pijar_food_mobile)
-- [Food Recipe Webiste Demo](https://fe-react-pijarfood.vercel.app)
+- [Food Recipe Webiste Demo](https://pijar-food-web.vercel.app)
 
 ## Authors
 
@@ -99,3 +123,5 @@ Contributors names and contact info:
 1. Naufal Luthfi Saputra
 
 - [Linkedin](https://www.linkedin.com/in/naufal-luthfi-saputra/)
+
+Feel free to check out the related projects and the provided Postman documentation for the API endpoints. If you have any questions or feedback, please don't hesitate to reach out to the author. Happy coding!
